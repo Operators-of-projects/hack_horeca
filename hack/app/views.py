@@ -1,3 +1,4 @@
+from geopy import distance
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
@@ -200,9 +201,17 @@ class AddReportToTransactionView(APIView):
         return Response({'id': new_report.pk}, status=status.HTTP_201_CREATED)
 
 
+def on_beach(client, vendor):
+    return distance.distance((client.lat, client.long), (vendor.lat, vendor.long)).km < 2
+
+
 class GetClientsByGPSView(APIView):
-    def get(self, request):
-        pass
+    def get(self, request, vendor_id):
+        """ ВСех чекать плохо - пробудь бизнес логику """
+        vendor = Vendor.objects.get(pk=vendor_id)
+        clients = [client for client in Client.objects.all() if on_beach(client, vendor)]
+        ser = ClientSerializer(clients, many=True)
+        return Response(ser.data, status=status.HTTP_200_OK)
 
 
 class GenerateQRView(APIView):
