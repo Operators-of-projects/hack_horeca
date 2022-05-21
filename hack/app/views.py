@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Product, Client, Vendor, Transaction, Report
-from .serializers import ProductSerializer, ClientSerializer, ClientTransactionSerializer, DetailTransaction, VendorTransactionSerializer
+from .serializers import VendorSerializer, ProductSerializer, ClientSerializer, ClientTransactionSerializer, DetailTransaction, VendorTransactionSerializer
 
 
 class AddClientView(APIView):
@@ -55,6 +55,13 @@ class DetailVendorView(APIView):
         vendor.long = request.data.get('long') if request.data.get('long') else vendor.long
         vendor.save()
         return Response({'id': vendor.pk}, status=status.HTTP_200_OK)
+
+
+class GetVendersView(APIView):
+    def get(self, request):
+        venders = Vendor.objects.all()
+        ser = VendorSerializer(venders, many=True)
+        return Response(ser.data, status=status.HTTP_200_OK)
 
 
 class CreateProductView(APIView):
