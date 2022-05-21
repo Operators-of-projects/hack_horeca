@@ -28,26 +28,28 @@ class AddProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('vendor', 'name', 'status', 'price')
+        fields = ('vendor', 'name', 'status', 'price', 'img')
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('name', 'vendor', 'status', 'price')
+        fields = ('id', 'name', 'vendor', 'status', 'price', 'img')
 
 
-# class ProductTransSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Product
-#         fields = ('id', )
+class ProductTransSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'price')
 
 
 class VendorTransactionSerializer(serializers.ModelSerializer):
+    product = ProductTransSerializer(many=True, read_only=True)
+    client = ClientSerializer(read_only=True)
 
     class Meta:
         model = Transaction
-        fields = ('status', 'cost', 'response', 'client', 'product')
+        fields = ('id', 'status', 'cost', 'response', 'client', 'product', 'description', 'photo')
 
 
 class ClientTransactionSerializer(serializers.ModelSerializer):
@@ -58,6 +60,7 @@ class ClientTransactionSerializer(serializers.ModelSerializer):
 
 
 class DetailTransaction(serializers.ModelSerializer):
+    client = ClientSerializer(read_only=True)
 
     class Meta:
         model = Transaction

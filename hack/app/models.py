@@ -13,6 +13,7 @@ def validate_rating(value: float):
 class Client(models.Model):
     # user = models.OneToOneField(User, verbose_name='Пользователи', on_delete=models.CASCADE)
     name = models.CharField(max_length=256, verbose_name='ФИО', )
+    phone = models.CharField(max_length=15, verbose_name='Телефон')
     balance = models.IntegerField(default=0)
     rating = models.FloatField(validators=[validate_rating], default=0)
     long = models.FloatField(blank=True, null=True)
@@ -22,17 +23,22 @@ class Client(models.Model):
 class Vendor(models.Model):
     # user = models.OneToOneField(User, verbose_name='Пользователи', on_delete=models.CASCADE)
     name = models.CharField(max_length=256, verbose_name='ФИО', )
+    description = models.TextField(verbose_name='Описание', default='')
+    photo = models.CharField(max_length=512, verbose_name='Фотография', blank=True, null=True)
     balance = models.IntegerField(default=0)
     rating = models.FloatField(validators=[validate_rating], default=0)
     long = models.FloatField(blank=True, null=True)
     lat = models.FloatField(blank=True, null=True)
     status = models.BooleanField(default=False)
+    is_product = models.BooleanField()
+    is_services = models.BooleanField()
 
 
 class Product(models.Model):
     name = models.CharField(max_length=256, verbose_name='Название организации')
     status = models.BooleanField(default=False)
     price = models.IntegerField()
+    img = models.CharField(max_length=512, verbose_name='Url к картинке', blank=True, null=True)
     vendor = models.ForeignKey(Vendor,
                                verbose_name='Вендор',
                                on_delete=models.CASCADE,

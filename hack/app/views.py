@@ -1,3 +1,8 @@
+import io
+import qrcode
+
+from django.shortcuts import render
+from django.db.models import Q
 from geopy import distance
 from django.http import Http404
 from rest_framework import status
@@ -11,7 +16,10 @@ from .serializers import VendorSerializer, ProductSerializer, ClientSerializer, 
 class AddClientView(APIView):
 
     def post(self, request):
-        client = Client.objects.create(name=request.data.get('name'))
+        client = Client.objects.create(name=request.data.get('name'),
+                                       balance=request.data.get('balance', 0),
+                                       lat=request.data.get('lat', None),
+                                       long=request.data.get('long', None))
         return Response({'id': client.pk}, status=status.HTTP_201_CREATED)
 
 
@@ -33,10 +41,21 @@ class DetailClientView(APIView):
         return Response({'id': client.pk}, status=status.HTTP_200_OK)
 
 
+class GetClientsView(APIView):
+
+    def get(self, request):
+        clients = Client.objects.all()
+        ser = ClientSerializer(clients, many=True)
+        return Response(ser.data, status=status.HTTP_200_OK)
+
+
 class AddVendorView(APIView):
 
     def post(self, request):
-        vendor = Vendor.objects.create(name=request.data.get('name'))
+        vendor = Vendor.objects.create(name=request.data.get('name'),
+                                       balance=request.data.get('balance', 0),
+                                       lat=request.data.get('lat', None),
+                                       long=request.data.get('long', None))
         return Response({'id': vendor.pk}, status=status.HTTP_201_CREATED)
 
 
@@ -60,7 +79,7 @@ class DetailVendorView(APIView):
 
 class GetVendersView(APIView):
     def get(self, request):
-        venders = Vendor.objects.all()
+        venders = Vendor.objects.filter(status=True)
         ser = VendorSerializer(venders, many=True)
         return Response(ser.data, status=status.HTTP_200_OK)
 
@@ -104,7 +123,7 @@ class DetailProductView(APIView):
 class ProductsView(APIView):
 
     def get(self, request, vendor_id):
-        products = Product.objects.filter(vendor=vendor_id)
+        products = Product.objects.filter(vendor=vendor_id, status=True)
         ser = ProductSerializer(products, many=True)
         return Response(ser.data, status=status.HTTP_200_OK)
 
@@ -126,9 +145,9 @@ class AddTransaction(APIView):
             cost += product.price
         if request.data.get("client_id"):
             client = Client.objects.get(id=request.data.get("client_id"))
-            new_transaction = Transaction.objects.create(vendor=vendor, client=client, cost=cost)
+            new_transaction = Transaction.objects.create(vendor=vendor, client=client, cost=cost, status=2)
         else:
-            new_transaction = Transaction.objects.create(vendor=vendor, cost=cost)
+            new_transaction = Transaction.objects.create(vendor=vendor, cost=cost, status=2)
         new_transaction.product.add(*products)
         resp = {"trasaction_id": new_transaction.pk}
         return Response(resp)
@@ -183,8 +202,19 @@ class DetailTransactionView(APIView):
 
 class NewTransactionsView(APIView):
     def get(self, request, vendor_id):
-        new_transactions = Transaction.objects.filter(vendor=vendor_id, status=1)
-        ser = VendorTransactionSerializer(new_transactions)
+        new_transactions = Transaction.objects.filter(vendor=vendor_id, status=1).first()
+        if new_transactions:
+            # new_transactions.status = 2
+            # new_transactions.save()
+            ser = VendorTransactionSerializer(new_transactions)
+            return Response(ser.data, status=status.HTTP_200_OK)
+        return Response({'status': 'Not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetNewOrViewedTransactionView(APIView):
+    def get(self, request, vendor_id):
+        new_transactions = Transaction.objects.filter(vendor=vendor_id).filter(Q(status=1) | Q(status=2))
+        ser = VendorTransactionSerializer(new_transactions, many=True)
         return Response(ser.data, status=status.HTTP_200_OK)
 
 
@@ -193,7 +223,8 @@ class AddReportToTransactionView(APIView):
         transaction = Transaction.objects.get(pk=transaction_id)
         new_report = Report.objects.create(transaction=transaction, score=request.data.get('score'),
                                            comment=request.data.get('comment'))
-        repost_scores = [r.score for r in Report.objects.filter(transaction__vendor__id=transaction.vendor.pk)]
+        repost_scores = [r.score for r in Report.objects.filter(transaction__vendor__id=transaction.vendor.pk,
+                                                                transaction__status=3)]
         avg_score = sum(repost_scores) / len(repost_scores)
         transaction.vendor.rating = avg_score
         transaction.vendor.save()
@@ -215,9 +246,37 @@ class GetClientsByGPSView(APIView):
 
 
 class GenerateQRView(APIView):
-    def get(self, request):
-        pass
+    def get(self, request, transaction_id):
+        tr = Transaction.objects.get(pk=transaction_id)
+        qr = qrcode.make(f"transaction_id: {transaction_id}")
+        url = f'img/transaction_id-{transaction_id}.png'
+        qr.save(f"static/{url}")
+        return render(request, 'qr2.html', context={'transaction_id': transaction_id, 'sum': tr.cost, 'img_url': url})
 
+
+def home(request):
+    return render(request, 'map.html')
+
+
+def orders(request):
+    return render(request, 'orders.html')
+
+
+def products(request):
+    return render(request, 'products.html')
+
+# def order(request):
+#     qr = qrcode.QRCode()
+#     qr.add_data(f"transaction_id: {transaction_id}")
+#     f = io.StringIO()
+#     qr.print_ascii(out=f)
+#     f.seek(0)
+#     return render(request, 'qrcode.html')
+
+
+
+
+# Страница с QR кодом
 
 
 # получить транзакции вендора/клиента/отдельная транзакция +

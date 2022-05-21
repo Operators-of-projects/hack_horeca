@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% load static %}
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/static/js/jquery.star-rating-svg.js"></script>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <title>Title</title>
+</head>
+<body>
+<div style="text-align: center; margin-top: 20px;">
+    <h1 style="font-weight: bold; font-size: 100px;">Номер заказа: {{ transaction_id }}</h1>
+    <img src="{% static img_url %}" width="70%">
+    <div id="text" style="font-size: 100px;">Отсканируйте QR-код для оплаты заказа</div>
+    <img id="galka" src="{% static 'img/galka.png' %}" style="display: none;" width="70%">
+    <div id="star" class="my-rating" style="display: none;"></div>
+</div>
+</body>
+<script>
+console.log($("#galka"));
+$(".my-rating").starRating({
+  initialRating: 4,
+  strokeColor: '#894A00',
+  strokeWidth: 15,
+  starSize: 30
+});
+function test(){
+    $.ajax({
+        url: 'https://3d2d-178-155-14-183.eu.ngrok.io/api/transaction/{{transaction_id}}/',
+        method: 'get',
+        crossDomain: true,
+        dataType: 'json',
+        contentType: 'application/json',
+        success: function(data){
+            if (data.status == 3){
+                $("#text").attr('style', 'display: none');
+                $("#galka").attr('style', 'display: false; margin-bottom: 20px;');
+                $("#star").attr('style', 'display: false');
+            }
+            else{
+                ready()
+            }
+        }
+    });
+}
+test()
+function ready(){
+   $(document).ready(function(){
+    setInterval('test()', 5000);
+});
+}
+</script>
+</html>

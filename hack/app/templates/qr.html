@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{% load static %}
+	<meta charset="utf-8"/>
+	<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+	<meta content="AnaPay" name="description"/>
+	<meta content="Press F1" name="author"/>
+	<title>AnaPay</title>
+	<link href="/static/img/anapa.ico" rel="icon" type="image/x-icon"/>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet"/>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+	<link href="{% static 'css/style.css' %}" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	<div class="container px-4 px-lg-5">
+		<img height="60vh" src="/static/img/anapa.ico" width="60vh">
+		<a class="navbar-brand" href="#!">AnaPay</a>
+		<button aria-controls="navbarSupportedContent" aria-expanded="false"
+		        aria-label="Toggle navigation" class="navbar-toggler"
+		        data-bs-target="#navbarSupportedContent" data-bs-toggle="collapse"
+		        type="button"><span class="navbar-toggler-icon"></span></button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+				<li class="nav-item"><a aria-current="page" class="nav-link active"
+				                        href="/beachack/front/products.html">Мои товары</a></li>
+				<li class="nav-item"><a class="nav-link" href="/beachack/front/orders.html">Мои заказы</a></li>
+			</ul>
+			<form class="d-flex">
+				<button class="btn btn-outline-dark" type="submit">
+					<i class="bi bi-cash-stack me-1"></i>
+					Мой счёт
+					<span class="badge bg-dark text-white ms-1 rounded-pill">300</span>
+				</button>
+			</form>
+		</div>
+	</div>
+</nav>
+<div class="bg-image"
+     style="background-image: url('/static/img/interior.jpg'); background-size: cover;">
+	<div class="mask" style="background-color: rgba(0, 0, 0, 0.75);">
+		<header class="py-3">
+			<div class="container px-4 px-lg-5 my-5">
+				<div class="text-center text-white">
+					<h1 class="display-4 fw-bolder">Шаверма от Арсена</h1>
+					<p class="lead fw-normal text-white-50 mb-2">Заказ №{{ transaction_id }}</p>
+					<div class="container pt-3">
+						<div class="row row-cols-1 row-cols-md-1 row-cols-xl-1 justify-content-center">
+							<img src="{% static img_url %}" width="70%">
+						</div>
+						<div class="row mt-3 row-cols-1 row-cols-md-1 row-cols-xl-1 justify-content-center">
+							<div class="text-center">
+								<h4 class="fw-bolder">Отсканируйте QR-код для оплаты заказа</h4>
+								<div class="d-flex justify-content-center small text-warning mb-2">
+									<div class="bi-star-fill"></div>
+									<div class="bi-star-fill"></div>
+									<div class="bi-star-fill"></div>
+									<div class="bi-star-fill"></div>
+									<div class="bi-star-fill"></div>
+								</div>
+								$18.00
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row px-3 mt-3 justify-content-center">
+					<button onclick="location.href='/'"
+					        class="btn btn-primary form-control btn-block" id="addProduct"
+					        type="button" >Вернуться
+					</button>
+				</div>
+			</div>
+		</header>
+	</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
